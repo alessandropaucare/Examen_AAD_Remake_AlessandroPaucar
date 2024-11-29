@@ -20,7 +20,6 @@ class Ex1DataRepository(
             return remoteUsers
         }
         return localUsers
-
     }
 
     override  fun getItems(): List<Item> {
