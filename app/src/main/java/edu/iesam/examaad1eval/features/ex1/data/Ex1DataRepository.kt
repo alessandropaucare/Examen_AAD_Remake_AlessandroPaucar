@@ -9,29 +9,40 @@ class Ex1DataRepository(
     private val local : Ex1LocalDataSource,
     private val remote : MockEx1RemoteDataSource
 ) : Ex1Repository{
-    override fun getUsers(): List<User> {
-        TODO("Not yet implemented")
+
+    override  fun getUsers(): List<User> {
+
+        val localUsers = local.getUsers()
+
+        if(localUsers.isEmpty()){
+            val remoteUsers = remote.getUsers()
+            local.saveUsers(remoteUsers)
+            return remoteUsers
+        }
+        return localUsers
+
     }
 
-    override fun getItems(): List<Item> {
-        TODO("Not yet implemented")
+    override  fun getItems(): List<Item> {
+        val localItems = local.getItems()
+
+        if(localItems.isEmpty()){
+            val remoteItems = remote.getItems()
+            local.saveItems(remoteItems)
+            return remoteItems
+        }
+        return localItems
     }
 
-    override fun getServices(): List<Services> {
-        TODO("Not yet implemented")
-    }
+    override  fun getServices(): List<Services> {
+        val localServices = local.getServices()
 
-    override fun saveUsers(users: List<User>) {
-        TODO("Not yet implemented")
+        if(localServices.isEmpty()){
+            val remoteServices = remote.getServices()
+            local.saveServices(remoteServices)
+            return remoteServices
+        }
+        return localServices
     }
-
-    override fun saveItems(items: List<Item>) {
-        TODO("Not yet implemented")
-    }
-
-    override fun saveServices(services: List<Services>) {
-        TODO("Not yet implemented")
-    }
-
 
 }
