@@ -1,7 +1,13 @@
 package edu.iesam.examaad1eval
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.room.Room
+import edu.iesam.examaad1eval.core.ExamAAD1EvalDatabase
+import edu.iesam.examaad1eval.features.ex2.data.GamesDataRepository
+import edu.iesam.examaad1eval.features.ex2.data.local.GamesDbLocalDataSource
+import edu.iesam.examaad1eval.features.ex2.data.remote.MockEx2RemoteDataSource
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -15,29 +21,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun executeExercise1(){
-        /*
-         val local = Ex1LocalDataSource(this)
-         val remote = MockEx1RemoteDataSource()
-         val dataRepository = Ex1DataRepository(local,remote)
 
-        val users = dataRepository.getUsers()
-        Log.d("@dev","Listado de usuarios")
-        Log.d("@dev","$users")
-        val items = dataRepository.getItems()
-        Log.d("@dev","Listado de items")
-        Log.d("@dev","$items")
-        val services = dataRepository.getServices()
-        Log.d("@dev","Listado de servicios")
-        Log.d("@dev","$services")
-
-         */
     }
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun executeExercise2(){
-        //Ejecutar el ejercicio 2 desde aquí llamando al Ex2DataRepository directamente
+
         GlobalScope.launch {
-            //llamar a Room
+
+            val database = Room.databaseBuilder(
+                applicationContext,
+                ExamAAD1EvalDatabase::class.java,
+                getString(R.string.databaseName)
+            ).build()
+
+            val gamesDao = database.gamesDao()
+
+            val localDataSource = GamesDbLocalDataSource(gamesDao)
+            val remoteDataSource = MockEx2RemoteDataSource()
+            val repository = GamesDataRepository(localDataSource, remoteDataSource)
+
+
+            val result = repository.getGames()
+
+            result.fold(
+                onSuccess = { games ->
+                    Log.d("@dev","The following games were saved: $games")
+                },
+                onFailure = { exception ->
+                    Log.d("@dev","Error in the fetching process: $exception")
+                }
+            )
+
         }
     }
 }
