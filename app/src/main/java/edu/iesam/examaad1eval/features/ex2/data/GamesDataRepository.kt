@@ -10,17 +10,38 @@ class GamesDataRepository(
     private val localDataSource: GamesDbLocalDataSource,
     private val remoteDataSource: MockEx2RemoteDataSource
 ) : Ex2Repository {
-    //TODO()
+
+    private val cacheSizeLimit = 5
+
     override suspend fun getGames(): Result<List<Game>> {
 
         try {
+
             val localGames = localDataSource.getAll()
+
+
             if (localGames.isEmpty()) {
                 val remoteGames = remoteDataSource.getGames()
-                localDataSource.saveAll(remoteGames)
+                localDataSource.saveAll(remoteGames.take(cacheSizeLimit))
                 return Result.success(remoteGames)
             }
+
+            val remoteGames = remoteDataSource.getGames()
+            val combinedList = mutableListOf<Game>()
+
+            combinedList.addAll(localGames)
+
+            for (item in remoteGames) {
+                if (!combinedList.any { it.id == item.id }) {
+                    combinedList.add(item)
+                }
+            }
+
+            localDataSource.saveAll(combinedList.take(cacheSizeLimit))
+
             return Result.success(localGames)
+
+
         } catch (e: Exception) {
                 return Result.failure(ErrorApp.GenericErrorApp)
         }
