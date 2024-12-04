@@ -53,6 +53,13 @@ class MainActivity : AppCompatActivity() {
                 }
             )
 
+            repository.getGames().onSuccess {
+                Log.d("@dev","The following games were saved: $it")
+            }
+            repository.getGames().onSuccess {
+                Log.d("@dev","The following games were saved: $it")
+            }
+
         }
     }
 }
